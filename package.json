@@ -1,0 +1,78 @@
+{
+  "name": "candy-machine-mint",
+  "version": "0.2.0",
+  "private": true,
+  "dependencies": {
+    "@strata-foundation/marketplace-sdk": "^3.2.5-lbc.0",
+    "@strata-foundation/spl-token-bonding": "^3.2.5-lbc.0",
+    "@strata-foundation/spl-utils": "^3.2.5-lbc.0",
+    "@strata-foundation/react": "^3.2.5-lbc.0",
+    "@babel/runtime": "^7.15.5",
+    "@chakra-ui/react": "^1.8.5",
+    "@civic/solana-gateway-react": "^0.4.12",
+    "@emotion/react": "^11.8.1",
+    "@emotion/styled": "^11.8.1",
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.60",
+    "@project-serum/anchor": "^0.17.0",
+    "@solana/spl-token": "^0.1.8",
+    "@solana/wallet-adapter-react": "^0.15.2",
+    "@solana/wallet-adapter-react-ui": "^0.9.1",
+    "@solana/wallet-adapter-wallets": "^0.14.3",
+    "@solana/web3.js": "^1.33.0",
+    "@testing-library/dom": "^7.21.4",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "@types/jest": "^26.0.15",
+    "@types/node": "^12.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "framer-motion": "^6.2.8",
+    "mime": "^3.0.0",
+    "next": "^12.1.0",
+    "prop-types": "^15.7.2",
+    "react": "17.0.2",
+    "react-circular-progressbar": "^2.0.4",
+    "react-countdown": "^2.3.2",
+    "react-dom": "17.0.2",
+    "react-hot-toast": "^2.2.0",
+    "react-is": "^16.8.0",
+    "styled-components": "^5.3.1",
+    "typescript": "^4.1.2",
+    "web-vitals": "^1.0.1"
+  },
+  "scripts": {
+    "clean": "shx rm -rf .next",
+    "dev": "NODE_OPTIONS='--inspect' next dev",
+    "watch": "tsc --watch --project tsconfig-build.json",
+    "build-lib": "tsc --project tsconfig-build.json",
+    "build": "yarn clean && next build && tsc --project tsconfig-build.json",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "precommit": "git-format-staged -f 'prettier --ignore-unknown --stdin --stdin-filepath \"{}\"' ."
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/styled-components": "^5.1.14"
+  }
+}
