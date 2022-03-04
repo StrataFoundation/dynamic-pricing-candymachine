@@ -1,17 +1,28 @@
 import {
   Box,
-  Center, Container, Heading,
+  Center,
+  Container,
+  Heading,
   Spinner,
   useColorModeValue,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
-import { GatewayProvider } from '@civic/solana-gateway-react';
-import * as anchor from '@project-serum/anchor';
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { PublicKey } from '@solana/web3.js';
-import { Branding, IMintArgs, LbcInfo, MintButton, useLivePrice, WalletModalButton } from "@strata-foundation/marketplace-ui";
+import { GatewayProvider } from "@civic/solana-gateway-react";
+import * as anchor from "@project-serum/anchor";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
 import {
-  Notification, useTokenBondingFromMint
+  Branding,
+  IMintArgs,
+  LbcInfo,
+  LbcStatus,
+  MintButton,
+  useLivePrice,
+  WalletModalButton,
+} from "@strata-foundation/marketplace-ui";
+import {
+  Notification,
+  useTokenBondingFromMint,
 } from "@strata-foundation/react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -19,10 +30,10 @@ import {
   CandyMachineAccount,
   CANDY_MACHINE_PROGRAM,
   getCandyMachineState,
-  mintOneToken
-} from './candy-machine';
+  mintOneToken,
+} from "./candy-machine";
 import { MintedNftNotification } from "./MintedNftNotification";
-import { getAtaForMint, toDate } from './utils';
+import { getAtaForMint, toDate } from "./utils";
 export interface HomeProps {
   candyMachineId?: anchor.web3.PublicKey;
   txTimeout: number;
@@ -72,7 +83,7 @@ const Home = (props: HomeProps) => {
         const cndy = await getCandyMachineState(
           anchorWallet,
           props.candyMachineId,
-          connection,
+          connection
         );
         let active =
           cndy?.state.goLiveDate?.toNumber() < new Date().getTime() / 1000;
@@ -100,14 +111,12 @@ const Home = (props: HomeProps) => {
           }
           // retrieves the whitelist token
           const mint = new anchor.web3.PublicKey(
-            cndy.state.whitelistMintSettings.mint,
+            cndy.state.whitelistMintSettings.mint
           );
           const token = (await getAtaForMint(mint, anchorWallet.publicKey))[0];
 
           try {
-            const balance = await connection.getTokenAccountBalance(
-              token,
-            );
+            const balance = await connection.getTokenAccountBalance(token);
             let valid = parseInt(balance.value.amount) > 0;
             // only whitelist the user if the balance > 0
             setIsWhitelistUser(valid);
@@ -118,7 +127,7 @@ const Home = (props: HomeProps) => {
             if (cndy.state.isWhitelistOnly) {
               active = false;
             }
-            console.log('There was a problem fetching whitelist token balance');
+            console.log("There was a problem fetching whitelist token balance");
             console.log(e);
           }
         }
@@ -136,7 +145,7 @@ const Home = (props: HomeProps) => {
         if (cndy?.state.endSettings?.endSettingType.amount) {
           let limit = Math.min(
             cndy.state.endSettings.number.toNumber(),
-            cndy.state.itemsAvailable,
+            cndy.state.itemsAvailable
           );
           if (cndy.state.itemsRedeemed < limit) {
             setItemsRemaining(limit - cndy.state.itemsRedeemed);
@@ -156,20 +165,18 @@ const Home = (props: HomeProps) => {
         setIsPresale((cndy.state.isPresale = presale));
         setCandyMachine(cndy);
       } catch (e) {
-        console.log('There was a problem fetching Candy Machine state');
+        console.log("There was a problem fetching Candy Machine state");
         console.log(e);
       }
     }
   }, [anchorWallet, props.candyMachineId, connection]);
 
-  async function buy(): Promise<void> {
-
-  }
+  async function buy(): Promise<void> {}
   const onMint = async (args: IMintArgs) => {
     try {
       document.getElementById("#identity")?.click();
       if (wallet.connected && candyMachine?.program && wallet.publicKey) {
-        const mint = await mintOneToken(candyMachine, wallet.publicKey, args)
+        const mint = await mintOneToken(candyMachine, wallet.publicKey, args);
         toast.custom(
           (t) => (
             <MintedNftNotification
@@ -183,7 +190,8 @@ const Home = (props: HomeProps) => {
         );
       }
     } catch (error: any) {
-      let message = error.msg || error.toString() || "Minting failed! Please try again!";
+      let message =
+        error.msg || error.toString() || "Minting failed! Please try again!";
       if (!error.msg) {
         if (!error.message) {
           message = "Transaction Timeout! Please try again.";
@@ -198,6 +206,8 @@ const Home = (props: HomeProps) => {
           window.location.reload();
         } else if (error.code === 312) {
           message = `Minting period hasn't started yet.`;
+        } else if (error.code === 6005 || error.code === 6006) {
+          message = "The price moved unfavorably more than the configured slippage percentage, transaction cancelled. Edit slippage in Advanced Settings"
         } else {
           message = error.toString();
         }
@@ -259,11 +269,12 @@ const Home = (props: HomeProps) => {
       overflow="auto"
       paddingBottom="200px"
     >
-      {wallet.connected && (
-        <Container mt={"35px"} justifyItems="stretch" maxW="460px">
+      <Container mt={"35px"} justifyItems="stretch" maxW="460px">
+        <VStack spacing={2} align="left">
           <Heading mb={2} fontSize="24px" fontWeight={600}>
             Mint
           </Heading>
+          <LbcStatus tokenBondingKey={tokenBonding?.publicKey} />
           <Box
             zIndex={1}
             shadow="xl"
@@ -273,72 +284,85 @@ const Home = (props: HomeProps) => {
             minH="300px"
             bg="black.300"
           >
-            {loading && (
+            {wallet.connected && (
+              <>
+                {loading && (
+                  <Center>
+                    <Spinner />
+                  </Center>
+                )}
+                {!loading && tokenBonding && (
+                  <VStack align="stretch" spacing={8}>
+                    <LbcInfo
+                      price={price}
+                      tokenBondingKey={tokenBonding.publicKey}
+                    />
+
+                    {candyMachine?.state.isActive &&
+                    candyMachine?.state.gatekeeper &&
+                    wallet.publicKey &&
+                    wallet.signTransaction ? (
+                      <GatewayProvider
+                        wallet={{
+                          publicKey:
+                            wallet.publicKey ||
+                            new PublicKey(CANDY_MACHINE_PROGRAM),
+                          //@ts-ignore
+                          signTransaction: wallet.signTransaction,
+                        }}
+                        gatekeeperNetwork={
+                          candyMachine?.state?.gatekeeper?.gatekeeperNetwork
+                        }
+                        clusterUrl={rpcUrl}
+                        options={{ autoShowModal: false }}
+                      >
+                        <MintButton
+                          price={price}
+                          onMint={onMint}
+                          tokenBondingKey={tokenBonding.publicKey}
+                          isDisabled={
+                            !isActive && (!isPresale || !isWhitelistUser)
+                          }
+                          disabledText={`Mint launches ${getCountdownDate(
+                            candyMachine
+                          )?.toLocaleTimeString()}`}
+                        />
+                      </GatewayProvider>
+                    ) : (
+                      <MintButton
+                        price={price}
+                        onMint={onMint}
+                        tokenBondingKey={tokenBonding.publicKey}
+                        isDisabled={
+                          !isActive && (!isPresale || !isWhitelistUser)
+                        }
+                        disabledText={
+                          candyMachine &&
+                          `Mint launches ${getCountdownDate(
+                            candyMachine
+                          )?.toLocaleTimeString()}`
+                        }
+                      />
+                    )}
+                    <Branding />
+                  </VStack>
+                )}
+              </>
+            )}
+            {!wallet.connected && (
               <Center>
-                <Spinner />
+                <WalletModalButton>Connect Wallet</WalletModalButton>
               </Center>
             )}
-            {!loading && tokenBonding && (
-              <VStack align="stretch" spacing={8}>
-                <LbcInfo
-                  price={price}
-                  tokenBondingKey={tokenBonding.publicKey}
-                />
-
-                {candyMachine?.state.isActive &&
-                candyMachine?.state.gatekeeper &&
-                wallet.publicKey &&
-                wallet.signTransaction ? (
-                  <GatewayProvider
-                    wallet={{
-                      publicKey:
-                        wallet.publicKey ||
-                        new PublicKey(CANDY_MACHINE_PROGRAM),
-                      //@ts-ignore
-                      signTransaction: wallet.signTransaction,
-                    }}
-                    gatekeeperNetwork={
-                      candyMachine?.state?.gatekeeper?.gatekeeperNetwork
-                    }
-                    clusterUrl={rpcUrl}
-                    options={{ autoShowModal: false }}
-                  >
-                    <MintButton
-                      price={price}
-                      onMint={onMint}
-                      tokenBondingKey={tokenBonding.publicKey}
-                      isDisabled={!isActive && (!isPresale || !isWhitelistUser)}
-                      disabledText={`Mint launches ${getCountdownDate(
-                        candyMachine
-                      )?.toLocaleTimeString()}`}
-                    />
-                  </GatewayProvider>
-                ) : (
-                  <MintButton
-                    price={price}
-                    onMint={onMint}
-                    tokenBondingKey={tokenBonding.publicKey}
-                    isDisabled={!isActive && (!isPresale || !isWhitelistUser)}
-                    disabledText={candyMachine && `Mint launches ${getCountdownDate(
-                      candyMachine
-                    )?.toLocaleTimeString()}`}
-                  />
-                )}
-                <Branding />
-              </VStack>
-            )}
           </Box>
-        </Container>
-      )}
-      {!wallet.connected && (
-        <WalletModalButton>Connect Wallet</WalletModalButton>
-      )}
+        </VStack>
+      </Container>
     </Box>
   );
 };
 
 const getCountdownDate = (
-  candyMachine: CandyMachineAccount,
+  candyMachine: CandyMachineAccount
 ): Date | undefined => {
   if (
     candyMachine.state.isActive &&
@@ -352,7 +376,7 @@ const getCountdownDate = (
       ? candyMachine.state.goLiveDate
       : candyMachine.state.isPresale
       ? new anchor.BN(new Date().getTime() / 1000)
-      : undefined,
+      : undefined
   );
 };
 

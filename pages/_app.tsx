@@ -15,9 +15,8 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
     <Providers cluster={rpcHost}>
       <Component {...pageProps} />
       <Toaster
-        position="bottom-center"
+        position="bottom-left"
         containerStyle={{
-          margin: "auto",
           width: "420px",
         }}
       />
