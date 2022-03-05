@@ -1,8 +1,8 @@
+import "../src/bufferFill";
 import { Providers } from "@strata-foundation/marketplace-ui";
 import { AppProps } from "next/app";
 import { FC } from "react";
 import { Toaster } from "react-hot-toast";
-import "../src/bufferFill";
 
 const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
 

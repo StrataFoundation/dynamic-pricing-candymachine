@@ -50,7 +50,7 @@ const Home = (props: HomeProps) => {
   const [isPresale, setIsPresale] = useState(false);
   const [discountPrice, setDiscountPrice] = useState<anchor.BN>();
   const mintKey = candyMachine?.state.tokenMint;
-  const { info: tokenBonding, loading } = useTokenBondingFromMint(mintKey);
+  const { info: tokenBonding, loading, error } = useTokenBondingFromMint(mintKey);
   const { price } = useLivePrice(tokenBonding?.publicKey);
 
   const rpcUrl = props.rpcHost;
@@ -192,6 +192,7 @@ const Home = (props: HomeProps) => {
     } catch (error: any) {
       let message =
         error.msg || error.toString() || "Minting failed! Please try again!";
+      let heading = "Transaction Failed";
       if (!error.msg) {
         if (!error.message) {
           message = "Transaction Timeout! Please try again.";
@@ -207,21 +208,27 @@ const Home = (props: HomeProps) => {
         } else if (error.code === 312) {
           message = `Minting period hasn't started yet.`;
         } else if (error.code === 6005 || error.code === 6006) {
-          message = "The price moved unfavorably more than the configured slippage percentage, transaction cancelled. Edit slippage in Advanced Settings"
+          heading = "Transaction Cancelled"
+          message = "The price moved unfavorably by more than the configured slippage. Change slippage by clicking Advanced Settings"
         } else {
           message = error.toString();
         }
       }
 
-      toast.custom((t) => (
-        <Notification
-          show={t.visible}
-          type="error"
-          heading="Transaction Failed"
-          message={message}
-          onDismiss={() => toast.dismiss(t.id)}
-        />
-      ));
+      toast.custom(
+        (t) => (
+          <Notification
+            show={t.visible}
+            type="error"
+            heading={heading}
+            message={message}
+            onDismiss={() => toast.dismiss(t.id)}
+          />
+        ),
+        {
+          duration: 120 * 1000,
+        }
+      );
       // updates the candy machine state to reflect the lastest
       // information on chain
       refreshCandyMachineState();
