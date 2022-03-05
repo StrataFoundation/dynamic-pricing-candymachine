@@ -44,7 +44,7 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "clean": "shx rm -rf .next",
+    "clean": "sh rm -rf .next",
     "dev": "NODE_OPTIONS='--inspect' next dev",
     "watch": "tsc --watch --project tsconfig-build.json",
     "build-lib": "tsc --project tsconfig-build.json",
