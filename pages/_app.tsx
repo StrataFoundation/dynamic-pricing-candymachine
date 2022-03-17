@@ -3,6 +3,7 @@ import { Providers } from "@strata-foundation/marketplace-ui";
 import { AppProps } from "next/app";
 import { FC } from "react";
 import { Toaster } from "react-hot-toast";
+import { BrowserView, MobileView } from "react-device-detect";
 
 const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
 
@@ -14,12 +15,24 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
   return (
     <Providers cluster={rpcHost}>
       <Component {...pageProps} />
-      <Toaster
-        position="bottom-left"
-        containerStyle={{
-          width: "420px",
-        }}
-      />
+      <BrowserView>
+        <Toaster
+          position="bottom-left"
+          containerStyle={{
+            width: "420px",
+          }}
+        />
+      </BrowserView>
+      <MobileView>
+        <Toaster
+          position="bottom-center"
+          containerStyle={{
+            margin: "0 auto",
+            width: "90%",
+            maxWidth: "420px",
+          }}
+        />
+      </MobileView>
     </Providers>
   );
 };
